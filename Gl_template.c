@@ -42,6 +42,9 @@ static HINSTANCE hInstance;
 // Rotation amounts
 static GLfloat xRot = 0.0f;
 static GLfloat yRot = 0.0f;
+static GLfloat xMove = 0.0f;
+static GLfloat yMove = 0.0f;
+static GLfloat zMove = -20.0f;
 
 
 static GLsizei lastHeight;
@@ -123,7 +126,7 @@ void calcNormal(float v[3][3], float out[3])
 // Change viewing volume and viewport.  Called when window is resized
 void ChangeSize(GLsizei w, GLsizei h)
 	{
-	GLfloat nRange = 1000.0f;
+	GLfloat nRange = 100.0f;
 	GLfloat fAspect;
 	// Prevent a divide by zero
 	if(h == 0)
@@ -141,15 +144,13 @@ void ChangeSize(GLsizei w, GLsizei h)
 	glLoadIdentity();
 
 	// Establish clipping volume (left, right, bottom, top, near, far)
-    if (w <= h) 
+ /*   if (w <= h) 
 		glOrtho (-nRange, nRange, -nRange*h/w, nRange*h/w, -nRange, nRange);
     else 
-		glOrtho (-nRange*w/h, nRange*w/h, -nRange, nRange, -nRange, nRange);
+		glOrtho (-nRange*w/h, nRange*w/h, -nRange, nRange, -nRange, nRange);*/
 
 	// Establish perspective: 
-	/*
 	gluPerspective(60.0f,fAspect,1.0,400);
-	*/
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -166,13 +167,13 @@ void SetupRC()
 	GLfloat  ambientLight[] = { 0.3f, 0.3f, 0.3f, 1.0f };
 	GLfloat  diffuseLight[] = { 0.7f, 0.7f, 0.7f, 1.0f };
 	GLfloat  specular[] = { 1.0f, 1.0f, 1.0f, 1.0f};
-	GLfloat	 lightPos[] = { 0.0f, 50.0f, 50.0f, 1.0f };
+	GLfloat	 lightPos[] = { 0.0f, 1110.0f, 11110.0f, 1.0f };
 	GLfloat  specref[] =  { 0.5f, 0.5f, 0.5f, 0.5f };
 
 
 	glEnable(GL_DEPTH_TEST);	// Hidden surface removal
 	glFrontFace(GL_CCW);		// Counter clock-wise polygons face out
-	//glEnable(GL_CULL_FACE);		// Do not calculate inside of jet
+	glEnable(GL_CULL_FACE);		// Do not calculate inside of jet
 
 	// Enable lighting
 	glEnable(GL_LIGHTING);
@@ -192,8 +193,8 @@ void SetupRC()
 
 	// All materials hereafter have full specular reflectivity
 	// with a high shine
-	glMaterialfv(GL_FRONT, GL_SPECULAR,specref);
-	glMateriali(GL_FRONT,GL_SHININESS, 512);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specref);
+	glMateriali(GL_FRONT,GL_SHININESS, 128);
 
 
 	// White background
@@ -227,8 +228,6 @@ void skrzynka(void)
 	glEnd();
 
 	glDisable(GL_TEXTURE_2D); // Wy³¹cz teksturowanie
-
-
 
 	glBegin(GL_QUADS);
 		glNormal3d(0,0,-1);
@@ -283,9 +282,6 @@ void kula(void)
 	gluSphere(obj,40,15,7);
 	glDisable(GL_TEXTURE_2D);
 }
-
-
-
 
 // LoadBitmapFile
 // opis: ³aduje mapê bitow¹ z pliku i zwraca jej adres.
@@ -353,6 +349,7 @@ unsigned char *LoadBitmapFile(char *filename, BITMAPINFOHEADER *bitmapInfoHeader
 	fclose(filePtr);
 	return bitmapImage;
 }
+
 void szescian(void)
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -426,12 +423,12 @@ void kulaElipsa(double x, double y, double z, double width, double height)
 	double m_xNext, m_zNext;
 	double vericalArc, horizontalArc;
 
-	double rate = GL_PI / 16.0;
+	double rate = GL_PI / 32.0;
 
 	for (horizontalArc = 0; horizontalArc <= GL_PI * 2; horizontalArc += rate)
 	{
 		glBegin(GL_TRIANGLE_STRIP);
-		glColor3d(0.3, 0.8, 0.3);
+		glColor3d(0.1, 0.4, 0.1);
 		for (vericalArc = 0; vericalArc <= GL_PI; vericalArc += rate)
 		{
 			m_y = height * cos(vericalArc);
@@ -483,6 +480,7 @@ void walec(double r, double h)
 	}
 	glEnd();
 }
+
 void ramie(double r1, double r2, double h, double d)
 {
 	double PI = 3.14, alpha, x, y;
@@ -562,6 +560,7 @@ void RenderScene(void)
 	glPushMatrix();
 	glRotatef(xRot, 1.0f, 0.0f, 0.0f);
 	glRotatef(yRot, 0.0f, 1.0f, 0.0f);
+	glTranslatef(xMove, yMove, zMove);
 
 	/////////////////////////////////////////////////////////////////
 	// MIEJSCE NA KOD OPENGL DO TWORZENIA WLASNYCH SCEN:		   //
@@ -571,8 +570,8 @@ void RenderScene(void)
 	//Sposób na odróŸnienie "przedniej" i "tylniej" œciany wielok¹ta:
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	kulaElipsa(0, -300, 0, 620, 320);
-	//walec(40, 40);
+	kulaElipsa(0, 0, 0, 10, 10);
+	//walec(10, 10);
 	//szescian();
 	//Uzyskanie siatki:
 	//glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
@@ -918,17 +917,34 @@ LRESULT CALLBACK WndProc(       HWND    hWnd,
 		// Key press, check for arrow keys to do cube rotation.
 		case WM_KEYDOWN:
 			{
-			if(wParam == VK_UP)
-				xRot-= 5.0f;
+			if (wParam == VK_UP)
+			{
+				xRot -= 5.0f;
+			}
 
-			if(wParam == VK_DOWN)
+			if (wParam == VK_DOWN)
+			{
 				xRot += 5.0f;
+			}
 
 			if(wParam == VK_LEFT)
 				yRot -= 5.0f;
 
 			if(wParam == VK_RIGHT)
 				yRot += 5.0f;
+
+			if (wParam == 'W')
+				zMove += 5.0f;
+
+			if (wParam == 'S')
+				zMove -= 5.0f;
+
+			if (wParam == 'A')
+				xMove += 5.0f;
+
+			if (wParam == 'D')
+				xMove -= 5.0f;
+
 
 			xRot = (const int)xRot % 360;
 			yRot = (const int)yRot % 360;
