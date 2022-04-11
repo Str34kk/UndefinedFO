@@ -44,7 +44,7 @@ static GLfloat xRot = 0.0f;
 static GLfloat yRot = 0.0f;
 static GLfloat xMove = 0.0f;
 static GLfloat yMove = 0.0f;
-static GLfloat zMove = -20.0f;
+static GLfloat zMove = 0.0f;
 
 
 static GLsizei lastHeight;
@@ -68,8 +68,6 @@ BOOL APIENTRY AboutDlgProc (HWND hDlg, UINT message, UINT wParam, LONG lParam);
 // Set Pixel Format function - forward declaration
 void SetDCPixelFormat(HDC hDC);
 
-
-
 // Reduces a normal vector specified as a set of three coordinates,
 // to a unit normal vector of length one.
 void ReduceToUnit(float vector[3])
@@ -92,7 +90,6 @@ void ReduceToUnit(float vector[3])
 	vector[1] /= length;
 	vector[2] /= length;
 	}
-
 
 // Points p1, p2, & p3 specified in counter clock-wise order
 void calcNormal(float v[3][3], float out[3])
@@ -121,8 +118,6 @@ void calcNormal(float v[3][3], float out[3])
 	ReduceToUnit(out);
 	}
 
-
-
 // Change viewing volume and viewport.  Called when window is resized
 void ChangeSize(GLsizei w, GLsizei h)
 	{
@@ -143,40 +138,28 @@ void ChangeSize(GLsizei w, GLsizei h)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	// Establish clipping volume (left, right, bottom, top, near, far)
- /*   if (w <= h) 
-		glOrtho (-nRange, nRange, -nRange*h/w, nRange*h/w, -nRange, nRange);
-    else 
-		glOrtho (-nRange*w/h, nRange*w/h, -nRange, nRange, -nRange, nRange);*/
+    // if (w <= h) glOrtho (-nRange, nRange, -nRange*h/w, nRange*h/w, -nRange, nRange);
+    // else glOrtho (-nRange*w/h, nRange*w/h, -nRange, nRange, -nRange, nRange);
 
-	// Establish perspective: 
 	gluPerspective(60.0f,fAspect,1.0,400);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	}
 
-
-
-// This function does any needed initialization on the rendering
-// context.  Here it sets up and initializes the lighting for
-// the scene.
 void SetupRC()
-	{
-	// Light values and coordinates
+{
 	GLfloat  ambientLight[] = { 0.3f, 0.3f, 0.3f, 1.0f };
 	GLfloat  diffuseLight[] = { 0.7f, 0.7f, 0.7f, 1.0f };
 	GLfloat  specular[] = { 1.0f, 1.0f, 1.0f, 1.0f};
-	GLfloat	 lightPos[] = { 0.0f, 1110.0f, 11110.0f, 1.0f };
+	GLfloat	 lightPos[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	GLfloat  specref[] =  { 0.5f, 0.5f, 0.5f, 0.5f };
-
 
 	glEnable(GL_DEPTH_TEST);	// Hidden surface removal
 	glFrontFace(GL_CCW);		// Counter clock-wise polygons face out
 	glEnable(GL_CULL_FACE);		// Do not calculate inside of jet
 
-	// Enable lighting
-	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHTING);		// Enable lighting
 
 	// Setup and enable light 0
 	glLightfv(GL_LIGHT0,GL_AMBIENT,ambientLight);
@@ -197,11 +180,11 @@ void SetupRC()
 	glMateriali(GL_FRONT,GL_SHININESS, 128);
 
 
-	// White background
+	// background
 	glClearColor(0.1f, 0.05f, 0.2f, 1.0f );
 	// Black brush
 	glColor3f(0.0,0.0,0.0);
-	}
+}
 
 void skrzynka(void)
 {
@@ -350,20 +333,20 @@ unsigned char *LoadBitmapFile(char *filename, BITMAPINFOHEADER *bitmapInfoHeader
 	return bitmapImage;
 }
 
-void szescian(void)
+void szescian(int x, int y, int z)
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	{
 		// Parametry wierzcholkow
 
-		GLfloat sa[3] = { 0.0f,0.0f,0.0f };
-		GLfloat sb[3] = { 10.0f,0.0f,0.0f };
-		GLfloat sc[3] = { 10.0f,10.0f,0.0f };
-		GLfloat sd[3] = { 0.0f,10.0f,0.0f };
-		GLfloat se[3] = { 0.0f,0.0f,-10.0f };
-		GLfloat sf[3] = { 10.0f,0.0f,-10.0f };
-		GLfloat sg[3] = { 10.0f,10.0f,-10.0f };
-		GLfloat sh[3] = { 0.0f,10.0f,-10.0f };
+		GLfloat sa[3] = { x + 0.0f, y + 0.0f, z + 0.0f };
+		GLfloat sb[3] = { x + 10.0f, y + 0.0f, z + 0.0f };
+		GLfloat sc[3] = { x + 10.0f, y + 10.0f, z + 0.0f };
+		GLfloat sd[3] = { x + 0.0f, y + 10.0f, z + 0.0f };
+		GLfloat se[3] = { x + 0.0f, y + 0.0f, z + -10.0f };
+		GLfloat sf[3] = { x + 10.0f, y + 0.0f, z + -10.0f };
+		GLfloat sg[3] = { x + 10.0f, y + 10.0f, z + -10.0f };
+		GLfloat sh[3] = { x + 0.0f, y + 10.0f, z + -10.0f };
 
 
 		// Sciany skladowe
@@ -548,7 +531,56 @@ void ramie(double r1, double r2, double h, double d)
 		}
 	glEnd();
 }
-// Called to draw scene
+
+void swiatlo(int x, int y, int z, int size)
+{
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	{
+		glBegin(GL_TRIANGLE_STRIP);
+		glColor3d(1.0, 1.0, 1.0);
+
+		glVertex3d(x - size, y - size, z + size);
+		glVertex3d(x - size, y - size, z - size);
+		glVertex3d(x + size, y - size, z - size);
+		
+		glVertex3d(x + size, y - size, z + size);
+		glVertex3d(x - size, y - size, z + size); 
+
+		glVertex3d(x - size, y + size, z + size);
+		glVertex3d(x - size, y - size, z - size); 
+
+		glVertex3d(x - size, y + size, z - size);
+		glVertex3d(x - size, y + size, z + size);
+
+		glVertex3d(x + size, y + size, z + size);
+		glVertex3d(x - size, y + size, z - size);
+
+		glVertex3d(x + size, y + size, z - size);
+		glVertex3d(x + size, y + size, z + size);
+
+		glVertex3d(x + size, y - size, z + size);
+		glVertex3d(x + size, y - size, z - size);
+
+		glVertex3d(x + size, y + size, z - size);
+		glVertex3d(x + size, y + size, z + size);
+
+		glVertex3d(x - size, y + size, z + size);
+		glVertex3d(x - size, y - size, z + size);
+
+		glVertex3d(x + size, y - size, z + size);
+		glVertex3d(x + size, y + size, z + size);
+
+		glVertex3d(x + size, y + size, z - size);
+		glVertex3d(x - size, y + size, z - size);
+		glVertex3d(x - size, y - size, z - size);
+
+		glVertex3d(x + size, y - size, z - size);
+		glVertex3d(x + size, y + size, z - size);
+
+		glEnd();
+	}
+}
+
 void RenderScene(void)
 	{
 	//float normal[3];	// Storeage for calculated surface normal
@@ -557,6 +589,7 @@ void RenderScene(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Save the matrix state and do the rotations
+	glPopMatrix();
 	glPushMatrix();
 	glRotatef(xRot, 1.0f, 0.0f, 0.0f);
 	glRotatef(yRot, 0.0f, 1.0f, 0.0f);
@@ -572,20 +605,20 @@ void RenderScene(void)
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	kulaElipsa(0, 0, 0, 10, 10);
 	//walec(10, 10);
-	//szescian();
+
+	
+
+	szescian(-30, 0, 0);
+	szescian(30, 0, 0);
 	//Uzyskanie siatki:
 	//glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
 	//Wyrysowanie prostokata:
 	//glRectd(-10.0,-10.0,20.0,20.0);
 		
-	/////////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////
+
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
-
-	// Flush drawing commands
 	glFlush();
 	}
 
@@ -771,7 +804,7 @@ LRESULT CALLBACK WndProc(       HWND    hWnd,
 							UINT    message,
 							WPARAM  wParam,
 							LPARAM  lParam)
-	{
+{
 	static HGLRC hRC;               // Permenant Rendering context
 	static HDC hDC;                 // Private GDI Device context
 
@@ -791,6 +824,7 @@ LRESULT CALLBACK WndProc(       HWND    hWnd,
 			// Create the rendering context and make it current
 			hRC = wglCreateContext(hDC);
 			wglMakeCurrent(hDC, hRC);
+			swiatlo(0, 0, 30, 10);
 			SetupRC();
 			glGenTextures(2, &texture[0]);                  // tworzy obiekt tekstury			
 			
@@ -933,6 +967,12 @@ LRESULT CALLBACK WndProc(       HWND    hWnd,
 			if(wParam == VK_RIGHT)
 				yRot += 5.0f;
 
+			if (wParam == VK_SPACE)
+				yMove += 5.0f;
+
+			if (wParam == VK_SHIFT)
+				yMove -= 5.0f;
+
 			if (wParam == 'W')
 				zMove += 5.0f;
 
@@ -981,10 +1021,7 @@ LRESULT CALLBACK WndProc(       HWND    hWnd,
 	}
 
     return (0L);
-	}
-
-
-
+}
 
 // Dialog procedure.
 BOOL APIENTRY AboutDlgProc (HWND hDlg, UINT message, UINT wParam, LONG lParam)
